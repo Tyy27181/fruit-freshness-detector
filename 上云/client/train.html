@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>训练模式 - 水果成熟度检测系统</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/fruit.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-database"></i>
+                    <span>TrainMode</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-panel="collect">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>数据采集</span>
+                </a>
+                <a href="#" class="nav-item" data-panel="preview">
+                    <i class="fas fa-eye"></i>
+                    <span>数据预览</span>
+                </a>
+                <a href="#" class="nav-item" data-panel="connection">
+                    <i class="fas fa-plug"></i>
+                    <span>连接设置</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="index.html" class="mode-switch-btn">
+                    <i class="fas fa-home"></i>
+                    <span>返回用户模式</span>
+                </a>
+                <div class="version-info">
+                    <span>v1.0.0 训练模式</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <div class="main-wrapper">
+            <!-- 顶部导航栏 -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">数据采集</h1>
+                    <span class="mode-indicator train-mode">
+                        <i class="fas fa-database"></i> 训练模式
+                    </span>
+                </div>
+                <div class="topbar-right">
+                    <div class="user-info" id="userInfo">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="usernameDisplay">--</span>
+                        <button class="logout-btn" onclick="logout()" title="退出登录">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                    <div class="connection-status" id="connectionStatus">
+                        <div class="status-indicator">
+                            <span class="status-dot"></span>
+                            <span class="status-text">传感器离线</span>
+                        </div>
+                    </div>
+                    <div class="current-time" id="currentTime"></div>
+                </div>
+            </header>
+
+            <!-- 主内容 -->
+            <main class="main-content">
+                <!-- 数据采集面板 -->
+                <div class="panel active" id="collectPanel">
+                    <div class="collect-header">
+                        <h2><i class="fas fa-database"></i> TinyML 数据采集</h2>
+                        <div class="collect-stats">
+                            <span class="stat-badge"><i class="fas fa-list"></i> 已采集: <strong id="collectCount">0</strong> 条</span>
+                        </div>
+                    </div>
+
+                    <!-- 采集控制区 -->
+                    <div class="collect-controls">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-apple-alt"></i> 选择水果类型</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="collect-fruit-selector" id="collectFruitSelector">
+                                    <div class="collect-fruit-item active" data-fruit="apple">
+                                        <span class="fruit-icon">🍎</span>
+                                        <span class="fruit-name">苹果</span>
+                                    </div>
+                                    <div class="collect-fruit-item" data-fruit="banana">
+                                        <span class="fruit-icon">🍌</span>
+                                        <span class="fruit-name">香蕉</span>
+                                    </div>
+                                    <div class="collect-fruit-item" data-fruit="orange">
+                                        <span class="fruit-icon">🍊</span>
+                                        <span class="fruit-name">橙子</span>
+                                    </div>
+                                    <div class="collect-fruit-item" data-fruit="grape">
+                                        <span class="fruit-icon">🍇</span>
+                                        <span class="fruit-name">葡萄</span>
+                                    </div>
+                                    <div class="collect-fruit-item" data-fruit="strawberry">
+                                        <span class="fruit-icon">🍓</span>
+                                        <span class="fruit-name">草莓</span>
+                                    </div>
+                                    <div class="collect-fruit-item" data-fruit="mango">
+                                        <span class="fruit-icon">🥭</span>
+                                        <span class="fruit-name">芒果</span>
+                                    </div>
+                                    <div class="collect-fruit-item" data-fruit="tangerine">
+                                        <span class="fruit-icon">🍊</span>
+                                        <span class="fruit-name">小橘子</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-tags"></i> 选择标签</h3>
+                            </div>
+                            <div class="card-body">
+                                <!-- 新鲜度标签（两阶段） -->
+                                <p style="margin-bottom: 10px; color: #888; font-size: 14px;">新鲜度分类（适用于小橘子等）</p>
+                                <div class="maturity-label-selector" id="maturityLabelSelector">
+                                    <div class="maturity-label-item active" data-label="fresh">
+                                        <div class="label-icon ripe">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <span class="label-name">新鲜</span>
+                                        <span class="label-desc">刚购买，状态良好</span>
+                                    </div>
+                                    <div class="maturity-label-item" data-label="not_fresh">
+                                        <div class="label-icon overripe">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                        </div>
+                                        <span class="label-name">不新鲜</span>
+                                        <span class="label-desc">放置较久，开始变质</span>
+                                    </div>
+                                </div>
+                                <!-- 成熟度标签（三阶段） -->
+                                <p style="margin: 20px 0 10px 0; color: #888; font-size: 14px;">成熟度分类（适用于香蕉、芒果等）</p>
+                                <div class="maturity-label-selector" id="maturityLabelSelector2">
+                                    <div class="maturity-label-item" data-label="unripe">
+                                        <div class="label-icon unripe">
+                                            <i class="fas fa-seedling"></i>
+                                        </div>
+                                        <span class="label-name">未成熟</span>
+                                        <span class="label-desc">果实青涩，尚需时日</span>
+                                    </div>
+                                    <div class="maturity-label-item" data-label="ripe">
+                                        <div class="label-icon ripe">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <span class="label-name">成熟</span>
+                                        <span class="label-desc">最佳食用期</span>
+                                    </div>
+                                    <div class="maturity-label-item" data-label="overripe">
+                                        <div class="label-icon overripe">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                        </div>
+                                        <span class="label-name">过熟</span>
+                                        <span class="label-desc">需要尽快处理</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 当前传感器数据预览 -->
+                    <div class="card collect-preview">
+                        <div class="card-header">
+                            <h3><i class="fas fa-eye"></i> 当前传感器数据</h3>
+                            <span class="preview-status" id="previewStatus">等待数据...</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="preview-grid">
+                                <div class="preview-item">
+                                    <span class="preview-label">乙醇(ADC)</span>
+                                    <span class="preview-value" id="previewEthanol">--</span>
+                                </div>
+                                <div class="preview-item">
+                                    <span class="preview-label">乙烯(V)</span>
+                                    <span class="preview-value" id="previewEthylene">-- V</span>
+                                </div>
+                                <div class="preview-item">
+                                    <span class="preview-label">TVOC</span>
+                                    <span class="preview-value" id="previewTvoc">-- mg/m³</span>
+                                </div>
+                                <div class="preview-item">
+                                    <span class="preview-label">HCHO</span>
+                                    <span class="preview-value" id="previewHcho">-- mg/m³</span>
+                                </div>
+                                <div class="preview-item">
+                                    <span class="preview-label">CO2</span>
+                                    <span class="preview-value" id="previewCo2">-- ppm</span>
+                                </div>
+                                <div class="preview-item">
+                                    <span class="preview-label">AQI</span>
+                                    <span class="preview-value" id="previewAqi">--</span>
+                                </div>
+                                <div class="preview-item">
+                                    <span class="preview-label">温度</span>
+                                    <span class="preview-value" id="previewTemp">-- °C</span>
+                                </div>
+                                <div class="preview-item">
+                                    <span class="preview-label">湿度</span>
+                                    <span class="preview-value" id="previewHumi">-- %</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 自动采集控制 -->
+                    <div class="card auto-collect-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-clock"></i> 自动采集</h3>
+                            <div class="auto-collect-status" id="autoCollectStatus">
+                                <span class="status-dot"></span>
+                                <span class="status-text">已关闭</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="auto-collect-controls">
+                                <div class="auto-collect-setting">
+                                    <label for="autoInterval">采集间隔（秒）</label>
+                                    <input type="number" id="autoInterval" value="5" min="1" max="60" step="1">
+                                </div>
+                                <div class="auto-collect-setting">
+                                    <label for="autoCount">采集次数（0=无限）</label>
+                                    <input type="number" id="autoCount" value="0" min="0" max="1000" step="1">
+                                </div>
+                                <div class="auto-collect-progress">
+                                    <span>已采集: <strong id="autoCollected">0</strong> 次</span>
+                                    <span id="autoCountdown"></span>
+                                </div>
+                            </div>
+                            <div class="auto-collect-actions">
+                                <button class="btn btn-success" id="startAutoBtn">
+                                    <i class="fas fa-play"></i>
+                                    <span>开始自动采集</span>
+                                </button>
+                                <button class="btn btn-danger" id="stopAutoBtn" disabled>
+                                    <i class="fas fa-stop"></i>
+                                    <span>停止</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 采集操作按钮 -->
+                    <div class="collect-actions">
+                        <button class="btn btn-primary btn-lg" id="recordDataBtn">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>记录当前数据</span>
+                        </button>
+                        <button class="btn btn-success btn-lg" id="exportCsvBtn">
+                            <i class="fas fa-file-csv"></i>
+                            <span>导出 CSV</span>
+                        </button>
+                        <button class="btn btn-danger" id="clearCollectBtn">
+                            <i class="fas fa-trash"></i>
+                            <span>清空数据</span>
+                        </button>
+                    </div>
+
+                    <!-- 已采集数据列表 -->
+                    <div class="card collect-data-list">
+                        <div class="card-header">
+                            <h3><i class="fas fa-table"></i> 已采集数据</h3>
+                            <span class="badge" id="dataCountBadge">0 条</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="collect-table-wrapper">
+                                <table class="collect-table" id="collectTable">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>时间</th>
+                                            <th>水果</th>
+                                            <th>标签</th>
+                                            <th>乙醇(ADC)</th>
+                                            <th>乙烯(V)</th>
+                                            <th>TVOC</th>
+                                            <th>CO2</th>
+                                            <th>温度</th>
+                                            <th>湿度</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="collectTableBody">
+                                        <tr class="empty-row">
+                                            <td colspan="11">
+                                                <div class="empty-state">
+                                                    <i class="fas fa-inbox"></i>
+                                                    <p>暂无采集数据，点击"记录当前数据"开始采集</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数据预览面板 -->
+                <div class="panel" id="previewPanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-bar"></i> 数据统计</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="--accent-color: #6366f1;">
+                                        <i class="fas fa-database"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <span class="stat-value" id="statTotal">0</span>
+                                        <span class="stat-label">总数据量</span>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="--accent-color: #22c55e;">
+                                        <i class="fas fa-seedling"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <span class="stat-value" id="statUnripe">0</span>
+                                        <span class="stat-label">未成熟</span>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="--accent-color: #3b82f6;">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <span class="stat-value" id="statRipe">0</span>
+                                        <span class="stat-label">成熟</span>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="--accent-color: #ef4444;">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <span class="stat-value" id="statOverripe">0</span>
+                                        <span class="stat-label">过熟</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-apple-alt"></i> 按水果分类</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="fruit-stats" id="fruitStats">
+                                <p class="empty-hint">暂无数据</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 连接设置面板 -->
+                <div class="panel" id="connectionPanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-server"></i> 服务器配置</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="serverHost">
+                                    <i class="fas fa-globe"></i> 服务器地址
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="text" id="serverHost" placeholder="ws://139.159.209.44:8080" value="ws://139.159.209.44:8080">
+                                    <span class="input-icon"><i class="fas fa-network-wired"></i></span>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button id="connectBtn" class="btn btn-primary">
+                                    <i class="fas fa-plug"></i>
+                                    <span>连接服务器</span>
+                                </button>
+                                <button id="disconnectBtn" class="btn btn-danger" disabled>
+                                    <i class="fas fa-times"></i>
+                                    <span>断开连接</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Toast 通知容器 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="js/websocket.js"></script>
+    <script src="js/train-app.js"></script>
+    <script>
+        // 登录检查
+        function checkLogin() {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            if (isLoggedIn !== 'true') {
+                window.location.href = 'login.html';
+                return false;
+            }
+            const username = sessionStorage.getItem('username') || '用户';
+            document.getElementById('usernameDisplay').textContent = username;
+            return true;
+        }
+
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                sessionStorage.removeItem('isLoggedIn');
+                sessionStorage.removeItem('username');
+                window.location.href = 'login.html';
+            }
+        }
+
+        checkLogin();
+    </script>
+</body>
+</html>

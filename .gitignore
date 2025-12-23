@@ -1,0 +1,48 @@
+# Keil MDK build outputs
+keil_fruit/Objects/
+keil_fruit/Listings/
+keil_fruit/DebugConfig/
+keil_fruit/RTE/
+*.o
+*.d
+*.axf
+*.hex
+*.bin
+*.map
+*.lst
+*.crf
+*.dep
+*.lnp
+*.htm
+*.build_log.htm
+*.uvguix.*
+*.scvd
+JLinkLog.txt
+JLink.log
+*.bak
+
+# Node.js
+node_modules/
+上云/server/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Training data (optional - uncomment if you want to exclude)
+# *.csv

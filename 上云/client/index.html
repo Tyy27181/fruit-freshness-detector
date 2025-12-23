@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水果新鲜度检测系统</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/fruit.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-lemon"></i>
+                    <span>FruitGuard</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-panel="monitor">
+                    <i class="fas fa-desktop"></i>
+                    <span>实时监控</span>
+                </a>
+                <a href="#" class="nav-item" data-panel="analysis">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>数据分析</span>
+                </a>
+                <a href="#" class="nav-item" data-panel="history">
+                    <i class="fas fa-history"></i>
+                    <span>历史记录</span>
+                </a>
+                <a href="#" class="nav-item" data-panel="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>系统设置</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="javascript:void(0)" class="mode-switch-btn" onclick="showModeSelector()">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>切换模式</span>
+                </a>
+                <div class="version-info">
+                    <span>v1.0.0 用户模式</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <div class="main-wrapper">
+            <!-- 顶部导航栏 -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">实时监控</h1>
+                </div>
+                <div class="topbar-right">
+                    <div class="user-info" id="userInfo">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="usernameDisplay">--</span>
+                        <button class="logout-btn" onclick="logout()" title="退出登录">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                    <div class="battery-status" id="batteryStatus">
+                        <div class="battery-icon">
+                            <div class="battery-body">
+                                <div class="battery-level" id="batteryLevel"></div>
+                            </div>
+                            <div class="battery-tip"></div>
+                        </div>
+                        <span class="battery-percent" id="batteryPercent">--%</span>
+                    </div>
+                    <div class="connection-status" id="connectionStatus">
+                        <div class="status-indicator">
+                            <span class="status-dot"></span>
+                            <span class="status-text">传感器离线</span>
+                        </div>
+                    </div>
+                    <div class="current-time" id="currentTime"></div>
+                </div>
+            </header>
+
+            <!-- 主内容 -->
+            <main class="main-content">
+                <!-- 实时监控面板 -->
+                <div class="panel active" id="monitorPanel">
+                    <!-- 水果检测总览 -->
+                    <div class="detection-overview">
+                        <!-- 水果类型选择 -->
+                        <div class="fruit-selector-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-apple-alt"></i> 检测水果</h3>
+                            </div>
+                            <div class="fruit-selector" id="fruitSelector">
+                                <div class="fruit-item active" data-fruit="apple">
+                                    <span class="fruit-icon">🍎</span>
+                                    <span class="fruit-name">苹果</span>
+                                </div>
+                                <div class="fruit-item" data-fruit="banana">
+                                    <span class="fruit-icon">🍌</span>
+                                    <span class="fruit-name">香蕉</span>
+                                </div>
+                                <div class="fruit-item" data-fruit="orange">
+                                    <span class="fruit-icon">🍊</span>
+                                    <span class="fruit-name">橙子</span>
+                                </div>
+                                <div class="fruit-item" data-fruit="grape">
+                                    <span class="fruit-icon">🍇</span>
+                                    <span class="fruit-name">葡萄</span>
+                                </div>
+                                <div class="fruit-item" data-fruit="strawberry">
+                                    <span class="fruit-icon">🍓</span>
+                                    <span class="fruit-name">草莓</span>
+                                </div>
+                                <div class="fruit-item" data-fruit="mango">
+                                    <span class="fruit-icon">🥭</span>
+                                    <span class="fruit-name">芒果</span>
+                                </div>
+                                <div class="fruit-item" data-fruit="tangerine">
+                                    <span class="fruit-icon">🍊</span>
+                                    <span class="fruit-name">小橘子</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 成熟度评估 -->
+                        <div class="maturity-card">
+                            <div class="current-fruit" id="currentFruit">
+                                <span class="fruit-icon-large">🍎</span>
+                                <span class="fruit-type">苹果</span>
+                            </div>
+                            <div class="maturity-gauge" id="maturityGauge">
+                                <svg viewBox="0 0 200 200">
+                                    <circle class="gauge-bg" cx="100" cy="100" r="80"/>
+                                    <circle class="gauge-fill" cx="100" cy="100" r="80" id="gaugeFill"/>
+                                </svg>
+                                <div class="gauge-content">
+                                    <span class="gauge-value" id="freshnessValue">--</span>
+                                    <span class="gauge-label">成熟度</span>
+                                </div>
+                            </div>
+                            <div class="maturity-status" id="freshnessStatus">
+                                <span class="status-badge" id="maturityBadge">等待检测</span>
+                                <span class="status-desc" id="maturityDesc">请连接传感器开始检测</span>
+                            </div>
+                        </div>
+
+                        <!-- TinyML 预测结果 -->
+                        <div class="prediction-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-brain"></i> TinyML 分析</h3>
+                            </div>
+                            <div class="prediction-content">
+                                <div class="prediction-item">
+                                    <span class="prediction-label">成熟阶段</span>
+                                    <span class="prediction-value" id="maturityStage">--</span>
+                                </div>
+                                <div class="prediction-item">
+                                    <span class="prediction-label">预计保鲜期</span>
+                                    <span class="prediction-value" id="shelfLife">--</span>
+                                </div>
+                                <div class="prediction-item">
+                                    <span class="prediction-label">存储建议</span>
+                                    <span class="prediction-value" id="storageAdvice">--</span>
+                                </div>
+                                <div class="prediction-item">
+                                    <span class="prediction-label">置信度</span>
+                                    <span class="prediction-value" id="confidence">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 气体监测卡片 -->
+                    <div class="section-title">
+                        <i class="fas fa-wind"></i>
+                        <span>气体监测</span>
+                    </div>
+                    <div class="sensor-grid">
+                        <!-- 乙醇 -->
+                        <div class="sensor-card" data-sensor="ethanol">
+                            <div class="sensor-header">
+                                <div class="sensor-icon ethanol">
+                                    <i class="fas fa-wine-bottle"></i>
+                                </div>
+                                <div class="sensor-title">
+                                    <span class="name">乙醇</span>
+                                    <span class="unit">Ethanol</span>
+                                </div>
+                            </div>
+                            <div class="sensor-value">
+                                <span class="value" id="ethanolValue">--</span>
+                                <span class="unit">ppm</span>
+                            </div>
+                            <div class="sensor-bar">
+                                <div class="bar-fill" id="ethanolBar" style="width: 0%"></div>
+                            </div>
+                            <div class="sensor-range">
+                                <span>0</span>
+                                <span>正常 &lt;50</span>
+                                <span>1000</span>
+                            </div>
+                        </div>
+
+                        <!-- 乙烯 C2H4 -->
+                        <div class="sensor-card" data-sensor="ethylene">
+                            <div class="sensor-header">
+                                <div class="sensor-icon ethylene">
+                                    <i class="fas fa-seedling"></i>
+                                </div>
+                                <div class="sensor-title">
+                                    <span class="name">乙烯</span>
+                                    <span class="unit">C2H4</span>
+                                </div>
+                            </div>
+                            <div class="sensor-value">
+                                <span class="value" id="ethyleneValue">--</span>
+                                <span class="unit">ppm</span>
+                            </div>
+                            <div class="sensor-bar">
+                                <div class="bar-fill" id="ethyleneBar" style="width: 0%"></div>
+                            </div>
+                            <div class="sensor-range">
+                                <span>0</span>
+                                <span>正常 &lt;10</span>
+                                <span>100</span>
+                            </div>
+                        </div>
+
+                        <!-- TVOC -->
+                        <div class="sensor-card" data-sensor="tvoc">
+                            <div class="sensor-header">
+                                <div class="sensor-icon tvoc">
+                                    <i class="fas fa-smog"></i>
+                                </div>
+                                <div class="sensor-title">
+                                    <span class="name">TVOC</span>
+                                    <span class="unit">总挥发性有机物</span>
+                                </div>
+                            </div>
+                            <div class="sensor-value">
+                                <span class="value" id="tvocValue">--</span>
+                                <span class="unit">mg/m³</span>
+                            </div>
+                            <div class="sensor-bar">
+                                <div class="bar-fill" id="tvocBar" style="width: 0%"></div>
+                            </div>
+                            <div class="sensor-range">
+                                <span>0</span>
+                                <span>正常 &lt;0.5</span>
+                                <span>3.0</span>
+                            </div>
+                        </div>
+
+                        <!-- HCHO 甲醛 -->
+                        <div class="sensor-card" data-sensor="hcho">
+                            <div class="sensor-header">
+                                <div class="sensor-icon hcho">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="sensor-title">
+                                    <span class="name">甲醛</span>
+                                    <span class="unit">HCHO</span>
+                                </div>
+                            </div>
+                            <div class="sensor-value">
+                                <span class="value" id="hchoValue">--</span>
+                                <span class="unit">mg/m³</span>
+                            </div>
+                            <div class="sensor-bar">
+                                <div class="bar-fill" id="hchoBar" style="width: 0%"></div>
+                            </div>
+                            <div class="sensor-range">
+                                <span>0</span>
+                                <span>正常 &lt;0.08</span>
+                                <span>0.5</span>
+                            </div>
+                        </div>
+
+                        <!-- 二氧化碳 -->
+                        <div class="sensor-card" data-sensor="co2">
+                            <div class="sensor-header">
+                                <div class="sensor-icon co2">
+                                    <i class="fas fa-cloud"></i>
+                                </div>
+                                <div class="sensor-title">
+                                    <span class="name">二氧化碳</span>
+                                    <span class="unit">CO2</span>
+                                </div>
+                            </div>
+                            <div class="sensor-value">
+                                <span class="value" id="co2Value">--</span>
+                                <span class="unit">ppm</span>
+                            </div>
+                            <div class="sensor-bar">
+                                <div class="bar-fill" id="co2Bar" style="width: 0%"></div>
+                            </div>
+                            <div class="sensor-range">
+                                <span>400</span>
+                                <span>正常 &lt;1000</span>
+                                <span>5000</span>
+                            </div>
+                        </div>
+
+                        <!-- AQI 空气质量指数 -->
+                        <div class="sensor-card" data-sensor="aqi">
+                            <div class="sensor-header">
+                                <div class="sensor-icon aqi">
+                                    <i class="fas fa-leaf"></i>
+                                </div>
+                                <div class="sensor-title">
+                                    <span class="name">空气质量</span>
+                                    <span class="unit">AQI</span>
+                                </div>
+                            </div>
+                            <div class="sensor-value">
+                                <span class="value" id="aqiValue">--</span>
+                                <span class="unit"></span>
+                            </div>
+                            <div class="sensor-bar">
+                                <div class="bar-fill" id="aqiBar" style="width: 0%"></div>
+                            </div>
+                            <div class="sensor-range">
+                                <span>0</span>
+                                <span>优 &lt;50</span>
+                                <span>300</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 环境监测 -->
+                    <div class="section-title">
+                        <i class="fas fa-thermometer-half"></i>
+                        <span>环境监测</span>
+                    </div>
+                    <div class="env-grid">
+                        <!-- 温度 -->
+                        <div class="env-card" data-sensor="temperature">
+                            <div class="env-icon temperature">
+                                <i class="fas fa-temperature-high"></i>
+                            </div>
+                            <div class="env-info">
+                                <span class="env-label">温度</span>
+                                <div class="env-value">
+                                    <span class="value" id="temperatureValue">--</span>
+                                    <span class="unit">°C</span>
+                                </div>
+                            </div>
+                            <div class="env-status" id="temperatureStatus">
+                                <span class="optimal-range">正常 &lt;30°C</span>
+                            </div>
+                        </div>
+
+                        <!-- 湿度 -->
+                        <div class="env-card" data-sensor="humidity">
+                            <div class="env-icon humidity">
+                                <i class="fas fa-tint"></i>
+                            </div>
+                            <div class="env-info">
+                                <span class="env-label">湿度</span>
+                                <div class="env-value">
+                                    <span class="value" id="humidityValue">--</span>
+                                    <span class="unit">%RH</span>
+                                </div>
+                            </div>
+                            <div class="env-status" id="humidityStatus">
+                                <span class="optimal-range">正常 &lt;90%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 最近更新 -->
+                    <div class="update-info">
+                        <i class="fas fa-clock"></i>
+                        <span>最后更新: </span>
+                        <span id="lastUpdate">--</span>
+                    </div>
+                </div>
+
+                <!-- 数据分析面板 -->
+                <div class="panel" id="analysisPanel">
+                    <div class="analysis-header">
+                        <h2><i class="fas fa-chart-line"></i> 趋势分析</h2>
+                        <div class="time-selector">
+                            <button class="time-btn active" data-range="1h">1小时</button>
+                            <button class="time-btn" data-range="6h">6小时</button>
+                            <button class="time-btn" data-range="24h">24小时</button>
+                            <button class="time-btn" data-range="7d">7天</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-placeholder">
+                            <i class="fas fa-chart-area"></i>
+                            <p>连接传感器后显示趋势图表</p>
+                        </div>
+                    </div>
+
+                    <!-- 统计摘要 -->
+                    <div class="stats-summary">
+                        <div class="stat-item">
+                            <span class="stat-label">平均新鲜度</span>
+                            <span class="stat-value" id="avgFreshness">--%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">最高温度</span>
+                            <span class="stat-value" id="maxTemp">--°C</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">平均湿度</span>
+                            <span class="stat-value" id="avgHumidity">--%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">预警次数</span>
+                            <span class="stat-value" id="alertCount">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 历史记录面板 -->
+                <div class="panel" id="historyPanel">
+                    <div class="history-header">
+                        <h2><i class="fas fa-history"></i> 历史记录</h2>
+                        <button class="btn btn-primary" id="exportData">
+                            <i class="fas fa-download"></i>
+                            <span>导出数据</span>
+                        </button>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>暂无历史记录</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 设置面板 -->
+                <div class="panel" id="settingsPanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-server"></i> 传感器连接</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="serverHost">
+                                    <i class="fas fa-globe"></i> 服务器地址
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="text" id="serverHost" placeholder="ws://139.159.209.44:8080" value="ws://139.159.209.44:8080">
+                                    <span class="input-icon"><i class="fas fa-network-wired"></i></span>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button id="connectBtn" class="btn btn-primary">
+                                    <i class="fas fa-plug"></i>
+                                    <span>连接传感器</span>
+                                </button>
+                                <button id="disconnectBtn" class="btn btn-danger" disabled>
+                                    <i class="fas fa-times"></i>
+                                    <span>断开连接</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-bell"></i> 预警设置</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <span class="setting-label">新鲜度预警</span>
+                                    <span class="setting-desc">新鲜度低于阈值时发出警报</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="freshnessAlert" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <span class="setting-label">温度预警</span>
+                                    <span class="setting-desc">温度超出范围时发出警报</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="tempAlert" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <span class="setting-label">声音通知</span>
+                                    <span class="setting-desc">预警时播放声音</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="soundAlert">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-palette"></i> 显示设置</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <span class="setting-label">深色模式</span>
+                                    <span class="setting-desc">切换界面主题颜色</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="darkModeToggle" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <span class="setting-label">自动刷新</span>
+                                    <span class="setting-desc">自动更新传感器数据</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="autoRefresh" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Toast 通知容器 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- 预警弹窗 -->
+    <div class="alert-modal" id="alertModal">
+        <div class="alert-content">
+            <div class="alert-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="alert-title">预警通知</h3>
+            <p class="alert-message" id="alertMessage">检测到异常情况</p>
+            <button class="btn btn-primary" id="closeAlert">确认</button>
+        </div>
+    </div>
+
+    <!-- 模式选择弹窗 -->
+    <div class="modal-overlay" id="modeModal">
+        <div class="modal-content mode-selector-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-th-large"></i> 选择模式</h3>
+                <button class="modal-close" onclick="closeModeSelector()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="mode-grid">
+                    <div class="mode-card active" onclick="selectMode('user')">
+                        <div class="mode-icon user">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h4>用户模式</h4>
+                        <p>查看水果成熟度检测结果</p>
+                        <span class="mode-badge current">当前模式</span>
+                    </div>
+                    <div class="mode-card" onclick="selectMode('train')">
+                        <div class="mode-icon train">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <h4>训练模式</h4>
+                        <p>采集数据用于模型训练</p>
+                        <span class="mode-badge locked"><i class="fas fa-lock"></i> 需要密码</span>
+                    </div>
+                    <div class="mode-card" onclick="selectMode('debug')">
+                        <div class="mode-icon debug">
+                            <i class="fas fa-bug"></i>
+                        </div>
+                        <h4>调试模式</h4>
+                        <p>WebSocket 通信调试</p>
+                        <span class="mode-badge locked"><i class="fas fa-lock"></i> 需要密码</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 密码验证弹窗 -->
+    <div class="modal-overlay" id="passwordModal">
+        <div class="modal-content password-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-lock"></i> 密码验证</h3>
+                <button class="modal-close" onclick="closePasswordModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="password-hint">请输入密码以进入 <strong id="targetModeName">--</strong></p>
+                <div class="password-input-wrapper">
+                    <input type="password" id="passwordInput" placeholder="请输入密码" maxlength="20" onkeypress="handlePasswordKeypress(event)">
+                    <button class="password-toggle" onclick="togglePasswordVisibility()">
+                        <i class="fas fa-eye" id="passwordEyeIcon"></i>
+                    </button>
+                </div>
+                <p class="password-error" id="passwordError"></p>
+                <div class="password-actions">
+                    <button class="btn btn-secondary" onclick="closePasswordModal()">取消</button>
+                    <button class="btn btn-primary" onclick="verifyPassword()">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/websocket.js"></script>
+    <script src="js/fruit-app.js"></script>
+    <script>
+        // 登录检查
+        function checkLogin() {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            if (isLoggedIn !== 'true') {
+                window.location.href = 'login.html';
+                return false;
+            }
+            // 显示用户名
+            const username = sessionStorage.getItem('username') || '用户';
+            document.getElementById('usernameDisplay').textContent = username;
+            return true;
+        }
+
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                sessionStorage.removeItem('isLoggedIn');
+                sessionStorage.removeItem('username');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // 页面加载时检查登录
+        checkLogin();
+
+        // 模式切换相关
+        let targetMode = '';
+        const MODE_PASSWORD = '1234';
+
+        function showModeSelector() {
+            document.getElementById('modeModal').classList.add('active');
+        }
+
+        function closeModeSelector() {
+            document.getElementById('modeModal').classList.remove('active');
+        }
+
+        function selectMode(mode) {
+            if (mode === 'user') {
+                closeModeSelector();
+                return;
+            }
+
+            targetMode = mode;
+            const modeName = mode === 'train' ? '训练模式' : '调试模式';
+            document.getElementById('targetModeName').textContent = modeName;
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('passwordError').textContent = '';
+
+            closeModeSelector();
+            document.getElementById('passwordModal').classList.add('active');
+            document.getElementById('passwordInput').focus();
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.remove('active');
+            targetMode = '';
+        }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById('passwordInput');
+            const icon = document.getElementById('passwordEyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function handlePasswordKeypress(event) {
+            if (event.key === 'Enter') {
+                verifyPassword();
+            }
+        }
+
+        function verifyPassword() {
+            const password = document.getElementById('passwordInput').value;
+            if (password === MODE_PASSWORD) {
+                const mode = targetMode; // 先保存目标模式
+                document.getElementById('passwordModal').classList.remove('active');
+                // 跳转到对应页面
+                if (mode === 'train') {
+                    window.location.href = 'train.html';
+                } else if (mode === 'debug') {
+                    window.location.href = 'debug.html';
+                }
+            } else {
+                document.getElementById('passwordError').textContent = '密码错误，请重试';
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
+            }
+        }
+    </script>
+</body>
+</html>
